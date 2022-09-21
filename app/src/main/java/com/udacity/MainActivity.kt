@@ -12,6 +12,9 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.view.MotionEvent
+import android.view.View
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Toast
@@ -24,13 +27,14 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
 
+
 class MainActivity : AppCompatActivity() {
 
     private var downloadID: Long = 0
 
     private lateinit var notificationManager: NotificationManager
-    private lateinit var pendingIntent: PendingIntent
-    private lateinit var action: NotificationCompat.Action
+    var selected=""
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,33 +43,75 @@ class MainActivity : AppCompatActivity() {
         createChannel("Download","Download")
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         val radioGroup=findViewById<RadioGroup>(R.id.group)
+
+
+
         custom_button.setOnClickListener {
             val id  = radioGroup.checkedRadioButtonId
             when(id){
                 -1->{ // return -1 when none selected
                     Toast.makeText(applicationContext,"Choose one option",Toast.LENGTH_LONG).show()
+
                 }else->{
                 val selectedItem = findViewById<RadioButton>(id)
-                download()
+                Log.d("1step","h")
+                download(selectedItem.text.toString())
             }
             }
         }
     }
+
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-            val bundle= bundleOf()
-            bundle.putString("name","iulshvds")
-            bundle.putString("Statue","failed")
-             notificationManager = ContextCompat.getSystemService(
+            val query = DownloadManager.Query()
+            val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+            notificationManager = ContextCompat.getSystemService(
                 applicationContext,
                 NotificationManager::class.java
             ) as NotificationManager
-            notificationManager.sendNotification(applicationContext.getString(R.string.notification_description), applicationContext,"bundle","shgdhjvsd")
+
+            query.setFilterById(id!!)
+
+            val cursor = downloadManager.query(query)
+
+            if (cursor.moveToFirst()){
+                val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                when (status) {
+                    DownloadManager.STATUS_SUCCESSFUL ->{
+                        notificationManager.sendNotification(
+                            applicationContext.getString(R.string.notification_description),
+                            applicationContext,selected,"Success")
+                    }
+                    DownloadManager.STATUS_FAILED -> {
+                        notificationManager.sendNotification(
+                            applicationContext.getString(R.string.notification_description),
+                            applicationContext,selected,"Failed")
+                    }
+
+                }
+            }
+
+
 
         }
     }
-    private fun download() {
+    private fun download(name:String) {
+    var url=""
+    when(name){
+        "Glide-Image Loading Library"-> {
+            url=URL1
+            selected=name
+        }
+        "Retrofit-HTTP Client for android and java"-> {
+            url=URL3
+            selected=name
+        }
+        "Load app-Current Repo by udacity"-> {
+            url=URL2
+            selected=name
+        }
+    }
         val notificationManager =
             ContextCompat.getSystemService(
                 applicationContext,
@@ -73,8 +119,8 @@ class MainActivity : AppCompatActivity() {
             ) as NotificationManager
         notificationManager.cancelNotifications()
         val request =
-            DownloadManager.Request(Uri.parse(URL))
-                .setTitle(getString(R.string.app_name))
+            DownloadManager.Request(Uri.parse(url))
+                .setTitle(name)
                 .setDescription(getString(R.string.app_description))
                 .setRequiresCharging(false)
                 .setAllowedOverMetered(true)
@@ -85,8 +131,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val URL =
+        private const val URL1 =
             "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+
+        private const val URL2="https://github.com/bumptech/glide"
+        private const val URL3="https://github.com/square/retrofit"
         private const val CHANNEL_ID = "channelId"
     }
 
@@ -111,6 +160,7 @@ class MainActivity : AppCompatActivity() {
             notificationManager.createNotificationChannel(notificationChannel)
         }
     }
+
 
 }
 

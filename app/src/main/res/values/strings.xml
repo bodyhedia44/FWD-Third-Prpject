@@ -15,4 +15,6 @@
     <string name="retrofit_http_client_for_android_and_java">Retrofit-HTTP Client for android and java</string>
     <string name="load_app_current_repo_by_udacity">Load app-Current Repo by udacity</string>
     <string name="todo">TODO</string>
+    <string name="file_name">File Name:</string>
+    <string name="statues">Statues</string>
 </resources>

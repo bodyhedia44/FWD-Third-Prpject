@@ -21,13 +21,18 @@ fun NotificationManager.sendNotification(messageBody: String, applicationContext
         contentIntent,
         PendingIntent.FLAG_UPDATE_CURRENT
     )
+
     val snoozeIntent = Intent(applicationContext, DetailActivity::class.java)
+    snoozeIntent.putExtra("name",Name)
+    snoozeIntent.putExtra("statue",statue)
     val snoozePendingIntent: PendingIntent = PendingIntent.getActivity(
         applicationContext,
         REQUEST_CODE,
         snoozeIntent,
         PendingIntent.FLAG_UPDATE_CURRENT
     )
+
+
     val builder = NotificationCompat.Builder(
         applicationContext,
         "Download"
