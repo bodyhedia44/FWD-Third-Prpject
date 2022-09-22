@@ -17,6 +17,7 @@ class LoadingButton @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     private var widthSize = 0
     private var heightSize = 0
+
      var rightval =0
         set(value) {
             field = value
@@ -31,16 +32,49 @@ class LoadingButton @JvmOverloads constructor(
     private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
 
     }
+
+    companion object {
+        private const val DEFAULT_BgDown_COLOR = Color.GREEN
+        private const val DEFAULT_BgLoad_COLOR = Color.YELLOW
+        private const val DEFAULT_TXTLoad_COLOR = Color.BLACK
+        private const val DEFAULT_TXTDown_COLOR = Color.BLACK
+        private const val DEFAULT_TXTSize = 0f
+
+    }
     val rect=Rect()
     val paint = Paint()
     val txtpaint = Paint()
     val arcpaint = Paint()
+    var BgColorDown=DEFAULT_BgDown_COLOR
+    var BgColorLoad=DEFAULT_BgLoad_COLOR
+    var TxtColorDown=DEFAULT_TXTDown_COLOR
+    var TxtColorLoad=DEFAULT_TXTLoad_COLOR
+    var TxtSize= DEFAULT_TXTSize
 
     init {
         buttonState=ButtonState.Completed
         isClickable=true
+        setupAttributes(attrs)
     }
+    private fun setupAttributes(attrs: AttributeSet?) {
 
+        val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.LoadingButton,
+            0, 0)
+
+        BgColorDown = typedArray.getColor(R.styleable.LoadingButton_BgColorDown,
+            DEFAULT_BgDown_COLOR)
+        BgColorLoad = typedArray.getColor(R.styleable.LoadingButton_BgColorLoad, DEFAULT_BgLoad_COLOR)
+        TxtColorDown = typedArray.getColor(R.styleable.LoadingButton_TxtColorDown, DEFAULT_TXTDown_COLOR)
+        TxtColorLoad = typedArray.getColor(R.styleable.LoadingButton_TxtColorLoad,
+            DEFAULT_TXTLoad_COLOR)
+        TxtSize = typedArray.getFloat(R.styleable.LoadingButton_TxtSize,
+            DEFAULT_TXTSize)
+
+
+
+
+        typedArray.recycle()
+    }
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
 
        when(event!!.action){
@@ -73,22 +107,22 @@ class LoadingButton @JvmOverloads constructor(
         rect.right=widthSize
         rect.bottom=heightSize
 
-        paint.setColor(Color.GREEN)
+        paint.setColor(BgColorDown)
 
         canvas!!.drawRect(rect,paint)
        if (buttonState==ButtonState.Completed || buttonState==ButtonState.Clicked){
-           txtpaint.setColor(Color.BLACK);
-           txtpaint.setTextSize(80f);
+           txtpaint.setColor(TxtColorDown);
+           txtpaint.setTextSize(TxtSize);
            canvas.drawText("Download", (widthSize/3).toFloat(), (heightSize/1.5).toFloat(), txtpaint);
        }else if(buttonState==ButtonState.Loading){
            rect.left=0
            rect.top=0
            rect.right= rightval
            rect.bottom=heightSize
-           txtpaint.setColor(Color.BLACK);
-           txtpaint.setTextSize(80f);
+           txtpaint.setColor(TxtColorDown);
+           txtpaint.setTextSize(TxtSize);
            arcpaint.setColor(Color.BLUE)
-           paint.setColor(Color.YELLOW)
+           paint.setColor(BgColorLoad)
 
            canvas.drawArc(
                 10f,10f,010f,10f,
